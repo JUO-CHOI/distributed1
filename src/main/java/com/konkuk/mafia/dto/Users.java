@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class Users {
-    private int id;
     private String userId;
-    private String userPw;
+    private String nickName;
+    private String passWd;
 }

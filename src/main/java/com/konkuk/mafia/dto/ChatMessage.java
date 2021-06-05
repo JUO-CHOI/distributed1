@@ -24,6 +24,8 @@ import java.awt.*;
 
 public class ChatMessage {
 
+
+
     public enum MessageType {
         CHAT,
         JOIN,
@@ -33,6 +35,7 @@ public class ChatMessage {
     private MessageType type;
     private String content;
     private String sender;
+
 
     public MessageType getType() {
         return type;

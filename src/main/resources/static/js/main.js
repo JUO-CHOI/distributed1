@@ -70,6 +70,7 @@ function sendMessage(event) {
 
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
+    console.log(message)
 
     var messageElement = document.createElement('li');
 
