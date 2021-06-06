@@ -25,14 +25,14 @@ public class LoginController {
         Users user = loginService.findUser(users);
 
         if(user == null) {
-            obj.addProperty("resultcode", 300);
+            obj.addProperty("resultcode", "300");
             obj.addProperty("nickname", "");
         }
         else if(user.getPassWd().equals(users.getPassWd())) {
-            obj.addProperty("resultcode", 200);
+            obj.addProperty("resultcode", "200");
             obj.addProperty("nickname", user.getNickName());
         } else {
-            obj.addProperty("resultcode", 400);
+            obj.addProperty("resultcode", "400");
             obj.addProperty("nickname", "");
         }
 
