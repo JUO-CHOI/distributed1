@@ -1,13 +1,12 @@
 package com.konkuk.mafia.controller;
 
 
+import com.google.gson.JsonObject;
 import com.konkuk.mafia.dto.Users;
 import com.konkuk.mafia.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class LoginController {
@@ -16,7 +15,18 @@ public class LoginController {
     private LoginService loginService;
 
     @PostMapping("/login")
-    public boolean login(@RequestBody Users users) throws Exception {
-        return loginService.findUser(users);
+    @ResponseBody
+    public String login(@RequestBody Users users) throws Exception {
+        JsonObject obj = new JsonObject();
+        LoginService.STATUS status = loginService.findUser(users);
+        if(status == LoginService.STATUS.SUCCESS) {
+            obj.addProperty("resultcode", 200);
+        } else if (status == LoginService.STATUS.ID_NOT_EXISTS) {
+            obj.addProperty("resultcode", 300);
+        } else {
+            obj.addProperty("resultcode", 400);
+        }
+
+        return obj.toString();
     }
 }

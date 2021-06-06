@@ -17,6 +17,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         //publish - pub
         config.setApplicationDestinationPrefixes("/app");
+
+        //user
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override

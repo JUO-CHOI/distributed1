@@ -13,11 +13,12 @@ public class LoginServiceImpl implements LoginService {
     LoginMapper loginMapper;
 
     @Override
-    public boolean findUser(Users users) throws Exception {
+    public STATUS findUser(Users users) throws Exception {
         Users user = loginMapper.selectUser(users.getUserId());
+        if(user == null) return STATUS.ID_NOT_EXISTS;
         if(user.getPassWd().equals(users.getPassWd())) {
-            return true;
+            return STATUS.SUCCESS;
         }
-        return false;
+        return STATUS.PASSWD_ERR;
     }
 }
