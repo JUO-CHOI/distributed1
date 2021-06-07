@@ -2,20 +2,19 @@ package com.konkuk.mafia.service;
 
 
 import com.konkuk.mafia.dto.Users;
-import com.konkuk.mafia.mapper.TestMapper;
+import com.konkuk.mafia.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
-public class TestServiceImpl implements TestService {
+public class UserServiceImpl implements UserService {
 
     @Autowired
-    private TestMapper testMapper;
+    private UserMapper userMapper;
 
-    public List<Users> test() throws Exception {
-        return testMapper.test();
+    public List<Users> getUserList() throws Exception {
+        return userMapper.getUserList();
     }
 }
