@@ -17,7 +17,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/userList")
-    public List<Users> test() throws Exception{
+    public List<Users> getUserList() throws Exception{
         System.out.println(userService.getUserList());
         return userService.getUserList();
     }

@@ -4,6 +4,7 @@ import com.konkuk.mafia.dto.ChatMessage;
 import com.konkuk.mafia.dto.ChatMessage.MessageType;
 import com.konkuk.mafia.dto.Roles;
 import com.konkuk.mafia.dto.Users;
+import com.konkuk.mafia.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class WebSocketEventListener {
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
 
+    @Autowired
+    private UserService service;
+
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         num = num+1;
@@ -41,8 +45,6 @@ public class WebSocketEventListener {
 
         if(num == 9) {
             Collections.shuffle(Arrays.asList(roles));
-
-
 
             for(int i=0; i<9; i++) {
                 roleHashMap.put(gamers.get(i), roles[i]);
@@ -59,21 +61,24 @@ public class WebSocketEventListener {
     }
 
     @EventListener
-    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws Exception{
         num = num-1;
         System.out.println("NUM:" + num);
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         gamers.remove((String)headerAccessor.getSessionId());
         System.out.println(gamers.toString());
         String username = (String) headerAccessor.getSessionAttributes().get("username");
+
+
         if(username != null) {
+            service.setUserStateFalse(username);
             logger.info("User Disconnected : " + username);
 
-            ChatMessage chatMessage = new ChatMessage();
-            chatMessage.setType(MessageType.LEAVE);
-            chatMessage.setSender(username);
+//            ChatMessage chatMessage = new ChatMessage();
+//            chatMessage.setType(MessageType.LEAVE);
+//            chatMessage.setSender(username);
 
-            messagingTemplate.convertAndSend("/topic/public", chatMessage);
+            messagingTemplate.convertAndSend("/topic/public",  service.getUserList());
         }
     }
 }
