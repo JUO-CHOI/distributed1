@@ -5,8 +5,22 @@
 <mapper namespace="com.konkuk.mafia.mapper.UserMapper">
     <select id="getUserList" resultType="com.konkuk.mafia.dto.Users">
         <![CDATA[
-            select nickname from (user);
+            select * from (user);
            ]]>
 
     </select>
+
+    <update id="setUserStateTrue"  parameterType="String"  >
+        <![CDATA[
+            update user set state = true where user_id=#{userId};
+           ]]>
+
+    </update>
+
+    <update id="setUserStateFalse" parameterType="String" >
+        <![CDATA[
+            update user set state = false where user_id=#{userId};
+           ]]>
+
+    </update>
 </mapper>

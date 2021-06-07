@@ -10,4 +10,5 @@ public class Users {
     private String userId;
     private String nickName;
     private String passWd;
+    private boolean state;
 }

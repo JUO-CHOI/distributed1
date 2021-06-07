@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface UserService {
     List<Users> getUserList() throws Exception;
+    void setUserStateTrue(String user) throws Exception;
+    void setUserStateFalse(String user) throws Exception;
 }
