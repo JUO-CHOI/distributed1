@@ -10,4 +10,5 @@ public interface UserService {
     List<Users> getUserList() throws Exception;
     void setUserStateTrue(String user) throws Exception;
     void setUserStateFalse(String user) throws Exception;
+    Users getUser(String userId) throws Exception;
 }

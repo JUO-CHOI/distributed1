@@ -10,4 +10,5 @@ public interface UserMapper {
     List<Users> getUserList();
     void setUserStateTrue(String userId);
     void setUserStateFalse(String userId);
+    Users getUser(String userId) throws Exception;
 }

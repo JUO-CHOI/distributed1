@@ -23,4 +23,12 @@
            ]]>
 
     </update>
+
+    <select id="getUser" resultType="com.konkuk.mafia.dto.Users">
+        <![CDATA[
+            select * from (user) where user_id=#{userId};;
+           ]]>
+
+    </select>
+
 </mapper>
