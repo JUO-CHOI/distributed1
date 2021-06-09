@@ -30,4 +30,9 @@ public class UserServiceImpl implements UserService {
     public void setUserStateFalse(String user) throws Exception {
         userMapper.setUserStateFalse(user);
     }
+
+    @Transactional
+    public Users getUser(String userId) throws Exception {
+        return userMapper.getUser(userId);
+    }
 }
