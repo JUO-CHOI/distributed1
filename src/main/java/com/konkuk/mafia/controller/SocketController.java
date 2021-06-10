@@ -65,7 +65,7 @@ public class SocketController {
 
     //직업 분배
     @MessageMapping("/role")
-    @SendToUser
+    @SendToUser("/queue/role")
     public String setRole(@Payload String userId) {
         System.out.println("JOB ARR BEFORE SIZE: " + jobs.size());
         Random random = new Random();
@@ -74,6 +74,7 @@ public class SocketController {
         String randomJob = jobs.get(idx);
         jobs.remove(idx);
         userRoleList.put(userId, randomJob);
+        System.out.println("USERJOB: " + userId + " " + randomJob);
 
         System.out.println("JOB ARR SIZE: " + jobs.size());
 
