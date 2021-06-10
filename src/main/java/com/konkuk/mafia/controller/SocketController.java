@@ -3,6 +3,7 @@ package com.konkuk.mafia.controller;
 
 import com.google.gson.JsonObject;
 import com.konkuk.mafia.dto.ChatMessage;
+import com.konkuk.mafia.dto.RoleMessage;
 import com.konkuk.mafia.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,19 +38,38 @@ public class SocketController {
     //private List<Users> usersList;
     private List<String> jobs = new ArrayList<String>() {
         {
-            add("Mafia");
-            add("Citizen");
-            add("Mafia");
-            add("Citizen");
-            add("Police");
-            add("Citizen");
-            add("Doctor");
-            add("Citizen");
-            add("MC");
+            add("사회자");
+            add("마피아");
+            add("스파이");
+            add("시민");
+            add("시민");
+            add("시민");
+            add("시민");
+            add("시민");
         }
     };
 
+    private List<String> words = new ArrayList<String>() {
+        {
+            add("코끼리");
+            add("에어컨");
+            add("반지");
+            add("해바라기");
+            add("마우스");
+            add("비행기");
+            add("선풍기");
+            add("양말");
+            add("아이폰");
+            add("크로플");
+            add("떡볶이");
+        }
+    };
+
+    private String selectedWord;
     private HashMap<String, String> userRoleList = new HashMap<>();
+
+    Random random = new Random();
+    String randomWord = null;
 
     //입장 알림
     @MessageMapping("/chat.addUser")
@@ -67,18 +87,38 @@ public class SocketController {
     @MessageMapping("/role")
     @SendToUser("/queue/role")
     public String setRole(@Payload String userId) {
-        System.out.println("JOB ARR BEFORE SIZE: " + jobs.size());
+        //System.out.println("JOB ARR BEFORE SIZE: " + jobs.size());
         Random random = new Random();
         int idx = random.nextInt(jobs.size()-1);
 
         String randomJob = jobs.get(idx);
         jobs.remove(idx);
         userRoleList.put(userId, randomJob);
-        System.out.println("USERJOB: " + userId + " " + randomJob);
+        System.out.println("RANDOM WORD: " + randomWord);
 
-        System.out.println("JOB ARR SIZE: " + jobs.size());
+        if(randomWord == null) {
+            this.randomWord = words.get(random.nextInt(words.size()-1));
+        }
 
-        return randomJob;
+        RoleMessage roleMessage = new RoleMessage();
+        roleMessage.setRole(randomJob);
+        if(randomJob.equals("마피아") == false) {
+           roleMessage.setWord(randomWord);
+        }
+        return roleMessage.toString();
+    }
+
+    //사회자가 마피아 요청
+    @MessageMapping("/mafia")
+    @SendToUser("/queue/mafia")
+    public String getMafiaInfo() {
+        for (String key : userRoleList.keySet()) {
+            if (userRoleList.get(key).equals("마피아")) {
+                System.out.println("MAFIA: " + key);
+                return key;
+            }
+        }
+        return null;
     }
 
 
@@ -89,48 +129,6 @@ public class SocketController {
         return chatMessage;
     }
 
-    //마피아+사회자 채팅(밤)
-    @MessageMapping("/chat.mafia")
-    @SendTo("/topic/mafia")
-    public ChatMessage sendMafiaMessage(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-        return chatMessage;
-    }
-
-    //의사+사회자 채팅(낮)
-    @MessageMapping("/chat.doctor")
-    @SendTo("/topic/doctor")
-    public ChatMessage sendDoctorMessage(@Payload ChatMessage chatMessage) {
-        return chatMessage;
-    }
-
-    //경찰+사회자 채팅(낮)
-    @MessageMapping("/chat.police")
-    @SendTo("/topic/police")
-    public ChatMessage sendPoliceMessage(@Payload ChatMessage chatMessage) {
-        return chatMessage;
-    }
-
-    //낮밤 알림
-    @MessageMapping("/chat.dayNight")
-    @SendTo("/topic/dayNight")
-    public String sendDayNightMessage(@Payload String now) {
-
-        String str;
-        if(now.equals("night")) {
-            str = "day";
-        } else {
-            str = "night";
-        }
-
-        return str;
-    }
-
-    //죽은 사람 알림
-    @MessageMapping("/chat.died")
-    @SendTo("/topic/died")
-    public String sendDeadPersonMessage(@Payload String userId) {
-        return userId;
-    }
 
     //방에서 나감. 또는 로그 아웃.
     @EventListener
@@ -139,16 +137,11 @@ public class SocketController {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String username = (String) headerAccessor.getSessionAttributes().get("username");
-        //System.out.println(username);
         jobs.add(userRoleList.get(username));
 
 
         if(username != null) {
             service.setUserStateFalse(username);
-
-//            ChatMessage chatMessage = new ChatMessage();
-//            chatMessage.setType(MessageType.LEAVE);
-//            chatMessage.setSender(username);
 
             messagingTemplate.convertAndSend("/topic/public",  service.getUserList());
         }
