@@ -85,7 +85,12 @@ public class SocketController {
 
         int idx = random.nextInt(jobs.size()-1);
 
-        String randomJob = jobs.get(idx);
+        String randomJob;
+        if(idx>=0) {
+            randomJob = jobs.get(idx);
+        } else {
+            randomJob = "시민";
+        }
         jobs.remove(idx);
         userRoleList.put(userId, randomJob);
 
@@ -95,13 +100,16 @@ public class SocketController {
         }
         System.out.println("RANDOM WORD: " + randomWord);
         System.out.println("RANDOM JOB: " + randomJob);
-        RoleMessage roleMessage = new RoleMessage();
-        roleMessage.setRole(randomJob);
+
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("role", randomJob);
 
         if(randomJob.equals("마피아") == false) {
-           roleMessage.setWord(randomWord);
+           //roleMessage.setWord(randomWord);
+            jsonObject.addProperty("word", randomWord);
         }
-        return roleMessage.toString();
+        return jsonObject.toString();
     }
 
     //사회자가 마피아 정보를 요청
@@ -135,10 +143,12 @@ public class SocketController {
 
         //누군가 나가면 '남은 직업' 배열에 그 사람의 직업을 추가함.
         jobs.add(userRoleList.get(username));
+        userRoleList.remove(username);
 
         //모두가 나가서 '남은 직업' 배열이 8개가 되면 랜덤 단어를 비움.
         if(jobs.size()==8) {
             this.randomWord = null;
+            userRoleList.clear();
             System.out.println("RANDOM WORLD NULL");
         }
 
