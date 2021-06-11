@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.konkuk.mafia.dto.Users;
 import com.konkuk.mafia.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

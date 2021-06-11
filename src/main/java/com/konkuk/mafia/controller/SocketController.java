@@ -35,7 +35,6 @@ public class SocketController {
     private UserService service;
 
     private final SimpMessageSendingOperations messagingTemplate;
-    //private List<Users> usersList;
     private List<String> jobs = new ArrayList<String>() {
         {
             add("사회자");
@@ -65,21 +64,16 @@ public class SocketController {
         }
     };
 
-    private String selectedWord;
     private HashMap<String, String> userRoleList = new HashMap<>();
-
-    Random random = new Random();
-    String randomWord = null;
+    private String randomWord = null;
 
     //입장 알림
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public/start")
     public String addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) throws Exception{
-        service.setUserStateTrue(chatMessage.getSender());
         headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        JsonObject object = new JsonObject();
-        //object.addProperty("nickname", service.getUser(chatMessage.getSender()).getNickName());
-        //return object.toString();
+        service.setUserStateTrue(chatMessage.getSender());
+        System.out.println("GET NICK NAME: " + service.getUser(chatMessage.getSender()).getNickName());
         return service.getUser(chatMessage.getSender()).getNickName();
     }
 
@@ -87,28 +81,38 @@ public class SocketController {
     @MessageMapping("/role")
     @SendToUser("/queue/role")
     public String setRole(@Payload String userId) {
-        //System.out.println("JOB ARR BEFORE SIZE: " + jobs.size());
         Random random = new Random();
+
         int idx = random.nextInt(jobs.size()-1);
 
-        String randomJob = jobs.get(idx);
+        String randomJob;
+        if(idx>=0) {
+            randomJob = jobs.get(idx);
+        } else {
+            randomJob = "시민";
+        }
         jobs.remove(idx);
         userRoleList.put(userId, randomJob);
-        System.out.println("RANDOM WORD: " + randomWord);
+
 
         if(randomWord == null) {
             this.randomWord = words.get(random.nextInt(words.size()-1));
         }
+        System.out.println("RANDOM WORD: " + randomWord);
+        System.out.println("RANDOM JOB: " + randomJob);
 
-        RoleMessage roleMessage = new RoleMessage();
-        roleMessage.setRole(randomJob);
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("role", randomJob);
+
         if(randomJob.equals("마피아") == false) {
-           roleMessage.setWord(randomWord);
+           //roleMessage.setWord(randomWord);
+            jsonObject.addProperty("word", randomWord);
         }
-        return roleMessage.toString();
+        return jsonObject.toString();
     }
 
-    //사회자가 마피아 요청
+    //사회자가 마피아 정보를 요청
     @MessageMapping("/mafia")
     @SendToUser("/queue/mafia")
     public String getMafiaInfo() {
@@ -122,7 +126,7 @@ public class SocketController {
     }
 
 
-    //단체 채팅(낮)
+    //단체 채팅
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public/day")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
@@ -135,16 +139,23 @@ public class SocketController {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) throws Exception{
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-
         String username = (String) headerAccessor.getSessionAttributes().get("username");
+
+        //누군가 나가면 '남은 직업' 배열에 그 사람의 직업을 추가함.
         jobs.add(userRoleList.get(username));
+        userRoleList.remove(username);
 
+        //모두가 나가서 '남은 직업' 배열이 8개가 되면 랜덤 단어를 비움.
+        if(jobs.size()==8) {
+            this.randomWord = null;
+            userRoleList.clear();
+            System.out.println("RANDOM WORLD NULL");
+        }
 
+        //StompHeaderAccessor 에 저장해 놓은 세션 유저가 disconnected 되면 상태를 0으로 바꿈.
         if(username != null) {
             service.setUserStateFalse(username);
-
             messagingTemplate.convertAndSend("/topic/public",  service.getUserList());
         }
     }
-
 }
